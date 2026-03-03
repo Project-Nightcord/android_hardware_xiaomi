@@ -10,6 +10,7 @@
 #include "Session.h"
 
 #include "CancellationSignal.h"
+#include <inttypes.h> 
 
 namespace aidl::android::hardware::biometrics::fingerprint {
 
@@ -36,14 +37,14 @@ Session::Session(fingerprint_device_t* device, UdfpsHandler* udfpsHandler, int u
 
 ndk::ScopedAStatus Session::generateChallenge() {
     uint64_t challenge = mDevice->pre_enroll(mDevice);
-    ALOGI("generateChallenge: %ld", challenge);
+    ALOGI("generateChallenge: %" PRIu64, challenge);
     mCb->onChallengeGenerated(challenge);
 
     return ndk::ScopedAStatus::ok();
 }
 
 ndk::ScopedAStatus Session::revokeChallenge(int64_t challenge) {
-    ALOGI("revokeChallenge: %ld", challenge);
+    ALOGI("revokeChallenge: %" PRId64, challenge);
     mDevice->post_enroll(mDevice);
     mCb->onChallengeRevoked(challenge);
 
@@ -108,14 +109,14 @@ ndk::ScopedAStatus Session::removeEnrollments(const std::vector<int32_t>& enroll
 
 ndk::ScopedAStatus Session::getAuthenticatorId() {
     uint64_t auth_id = mDevice->get_authenticator_id(mDevice);
-    ALOGI("getAuthenticatorId: %ld", auth_id);
+    ALOGI("getAuthenticatorId: %" PRIu64, auth_id);
     mCb->onAuthenticatorIdRetrieved(auth_id);
     return ndk::ScopedAStatus::ok();
 }
 
 ndk::ScopedAStatus Session::invalidateAuthenticatorId() {
     uint64_t auth_id = mDevice->get_authenticator_id(mDevice);
-    ALOGI("invalidateAuthenticatorId: %ld", auth_id);
+    ALOGI("invalidateAuthenticatorId: %" PRIu64, auth_id);
     mCb->onAuthenticatorIdInvalidated(auth_id);
     return ndk::ScopedAStatus::ok();
 }
@@ -289,7 +290,7 @@ bool Session::checkSensorLockout() {
     }
     if (lockoutMode == LockoutTracker::LockoutMode::kTimed) {
         int64_t timeLeft = mLockoutTracker.getLockoutTimeLeft();
-        ALOGE("Fail: lockout timed: %ld", timeLeft);
+        ALOGE("Fail: lockout timed: %" PRId64, timeLeft);
         mCb->onLockoutTimed(timeLeft);
         if (!mIsLockoutTimerStarted) startLockoutTimer(timeLeft);
         return true;
